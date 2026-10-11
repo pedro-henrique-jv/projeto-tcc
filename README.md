@@ -1,129 +1,65 @@
-# Projeto TCC
+# Banco de dados do Censo da Educação Superior (INEP) para avaliação de LLMs em Text-to-SQL
 
-Template de repositório para projetos de TCC.
+Repositório do Trabalho de Conclusão de Curso *Um Benchmark para Avaliação de Desempenho de LLMs em Tarefas Text-to-SQL sobre Dados do Censo da Educação Superior* (Sistemas de Informação, UFSM).
 
-## Checklist
+Aqui estão o **schema SQL** e o **script de ETL** que constroem o banco relacional normalizado (MariaDB) usado como base do benchmark, a partir dos microdados do Censo da Educação Superior de 2009 a 2024, divulgados pelo INEP.
 
-### Definição do tema
+## Estrutura
 
-- [ ] Escolher um tema de pesquisa
-- [ ] Qual a relevância deste tema? Ele já foi proposto na literatura? **Ele já existe?**
-  - Provavelmente quase tudo já foi proposto na literatura. É importante especializar o tema de maneira a cobrir algo que ainda não foi proposto
-  - Por exemplo, já existe um algortimo que faz isso. Mas nunca foi testado nos dados da UFSM.
-- [ ] Escrever uma breve descrição do problema de pesquisa (5–10 linhas)
-  - "Pretendo neste trabalho implementar um algoritmo para fazer tal coisa com estes dados..."
-- [ ] Escolher entre 3 e 5 palavras-chave
-- [ ] Fazer uma busca preliminar no Google Scholar se já não existe algo muito parecido com o que está sendo proposto
-  - [ ] Caso já exista algo muito parecido, pensar em como propor algo um pouco diferente, mas inovador
+| Pasta / arquivo | Conteúdo |
+|---|---|
+| `sql/01_schema.sql` | Criação do banco, das tabelas e das tabelas de domínio |
+| `etl/etl.py` | Carga dos microdados do INEP no banco |
+| `etl/requirements.txt` | Dependências Python do ETL |
+| `docker-compose.yml` | Sobe o MariaDB já com o schema aplicado |
+| `.env.example` | Modelo das variáveis de ambiente (copie para `.env`) |
+| `Template_MDT_UFSM_2026/` | Template LaTeX do documento do TCC |
 
-### Pergunta de pesquisa
+## Como reproduzir
 
-- [ ] Formular uma pergunta de pesquisa clara. Qual o problema que o seu trabalho busca resolver?
-- [ ] Identificar objetivos, geral e específicos
-  - **Objetivo geral:** o que se pretende fazer com o seu trabalho
-  - **Objetivos específicos:** são os passos que precisam ser atingidos antes de atingir o objetivo geral. Por exemplo, revisar a literatura,
-    escolher um framework, implementar o algoritmo, fazer testes, etc
-- [ ] Criar um repositório no GitHub para armazenar arquivos do projeto. Pode ser um fork desse aqui!
-- [ ] Criar um projeto em LaTeX no [Overleaf](https://overleaf.com)
-  - [ ] Leia [este arquivo](_prof_henry__Template_MDT_UFSM__2026_) para instruções
-  - [ ] Compartilhar com o orientador
-  - [ ] Nomear arquivo como `[TCC] <meu nome> (<ano>)`
-    - Por exemplo, `[TCC] Henry (2026)`
+Pré-requisitos: Docker e Python 3.
 
-### Busca na literatura
+**1. Configurar as variáveis de ambiente**
 
-- [ ] Definir strings de busca para pesquisar **trabalhos relacionados** nos principais repositórios acadêmicos. Confira [esta página](https://github.com/CTISM-Prof-Henry/research/blob/main/capitulos/ARTIGOS/PESQUISANDO.md)
-  - [ ] Scopus (o mais prestigiado - tem que buscar aqui)
-  - [ ] Google Scholar (o maior - mas tem muita coisa que não interessa também)
-  - [ ] IEEE (para artigos publicados em revistas e conferências da IEEE)
-  - [ ] ACM (para artigos publicados em revistas e conferências da IEEE)
-  - [ ] Existem outros, com Science Direct, Research Gate (que é uma rede social). Varia de caso a caso.
-- [ ] Definir um intervalo de datas. Geralmente se busca nos últimos 5 anos
-- [ ] Catalogar:
-  - [ ] número de artigos encontrados com as strings de busca
-  - [ ] número de artigos que foi possível baixar o PDF (às vezes, está bloqueado - esses a gente descarta)
-  - [ ] A gente lê/baixa apenas alguns, não todos, quando tem muita coisa retornada
-  - [ ] remover duplicatas - às vezes vem coisa repetida (achei no Scopus e depois listou no Google Scholar também)
-- [ ] Baixar PDF dos artigos e armazenar no repositório do GitHub
-- [ ] Criar uma planilha/lista com artigos encontrados
+```bash
+cp .env.example .env
+```
 
-### Leitura inicial
+Edite o `.env` e troque as senhas. Se a porta 3306 já estiver em uso no seu computador, mude `DB_PORT` (por exemplo, para 3307).
 
-O objetivo dessa fase é achar qualquer motivo para **não ler** os artigos pesquisados, pois geralmente são muitos.
+**2. Subir o banco**
 
-- [ ] Ler título e resumo dos artigos encontrados
-- [ ] Marcar artigos potencialmente relevantes
-- [ ] Excluir artigos claramente fora do escopo
+```bash
+docker compose up -d
+docker compose ps
+```
 
-### Leitura intermediária
+Aguarde o estado `healthy`. O schema (`sql/01_schema.sql`) é aplicado automaticamente na primeira inicialização, apenas quando o volume de dados está vazio. Para recriar o banco do zero: `docker compose down -v`.
 
-O objetivo ainda é **não ler** artigos. Mas agora já estamos começando a ler cada vez mais.
+**3. Baixar os microdados**
 
-- [ ] Ler introdução e conclusão dos artigos selecionados
-- [ ] Identificar os trabalhos mais importantes da área
-- [ ] Registrar contribuições principais de cada artigo
-- [ ] Atualizar a lista de referências relevantes
+Baixe os arquivos do Censo da Educação Superior no site do INEP: [[https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/censo-da-educacao-superior](https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/censo-da-educacao-superior)]. Extraia-os em uma pasta `data/` na raiz do repositório. O ETL procura, recursivamente, arquivos como:
 
-### Leitura avançada
+- `MICRODADOS_CADASTRO_IES_<ano>.CSV` (ou `MICRODADOS_ED_SUP_IES_<ano>.CSV` em anos recentes)
+- `MICRODADOS_CADASTRO_CURSOS_<ano>.CSV`
 
-Se um artigo chegou até aqui, quer dizer que ele é relevante. Aí não tem escapatória - vai ter que ler tudo!
+A pasta `data/` não é versionada.
 
-- [ ] Ler artigos restantes detalhadamente
-- [ ] Anotar métodos, resultados e limitações
-- [ ] Identificar tendências e abordagens comuns
-- [ ] Registrar citações importantes
+**4. Executar o ETL**
 
->[!NOTE]
-> Dica! Para não se perder nas referências na hora de escrever o documento no LaTeX, copie-e-cole trechos de cada
-> artigo no texto, já colocando a referência BibTeX no arquivo de referências. Faça isso para cada artigo que você
-> for lendo (ou seja, não deixe para fazer no fim!)
-> Depois, quando você for reescrever o texto com suas palavras, lá no fim do semestre, você só precisa "costurar"
-> o raciocínio de todos os trechos copiados.
+```bash
+pip install -r etl/requirements.txt
+python etl/etl.py --data-dir ./data
+```
 
-### Estrutura do texto
+Para carregar apenas um ano: `python etl/etl.py --data-dir ./data --year 2024`.
 
-Confira [esta página](https://github.com/CTISM-Prof-Henry/research/blob/main/capitulos/ARTIGOS/ESTRUTURA.md) para uma explicação da estrutura de artigos (parecida com TCC)
+O ETL lê a conexão das variáveis `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` e `DB_NAME` (do `.env` ou do ambiente).
 
-- [ ] Definir a estrutura do documento
-- [ ] Criar seções no LaTeX:
-  - [ ] Introdução
-  - [ ] Trabalhos relacionados
-  - [ ] Metodologia
-  - [ ] Objetivos
-  - [ ] Cronograma
-  - [ ] Trabalhos futuros
-  - [ ] Referências
+## Observações sobre o modelo
 
-### Escrita
+Cursos a distância aparecem em várias linhas por ano no arquivo do INEP, e a regra correta para somar métricas depende da coluna (`tp_dimensao`). A explicação completa está no cabeçalho de `sql/01_schema.sql` e nos comentários das colunas de `curso_estatisticas`.
 
-Escreva o texto!
+## Licença
 
-- [ ] Introdução
-- [ ] Trabalhos relacionados
-- [ ] Metodologia
-- [ ] Objetivos
-- [ ] Cronograma
-- [ ] Trabalhos futuros
-- [ ] Referências
-
-### Revisão
-
-- [ ] Revisar clareza e organização do texto
-- [ ] Revisar ortografia e gramática
-- [ ] Verificar formatação em LaTeX
-  - [ ] zerar erros
-  - [ ] (tentar) zerar warnings. Nem sempre é possível. Dá um Google!
-- [ ] Conferir todas as referências e citações
-
-### Banca
-
-- [ ] Escolher professores para compor a banca
-- [ ] Enviar convites por e-mail
-- [ ] Encontrar uma data para a defesa
-
-### Apresentação 
-
-- [ ] Criar apresentação em slides
-- [ ] Destacar problema, método de busca e principais resultados
-- [ ] Ensaiar a apresentação. No máximo 30 minutos
-- [ ] Antecipar perguntas na apresentação, deixar slides com respostas prontos no fim dos slides (oculto)
+MIT (ver `LICENSE`).
