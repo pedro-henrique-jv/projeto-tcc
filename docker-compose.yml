@@ -1,0 +1,25 @@
+services:
+  db:
+    image: mariadb:11.4
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-changeme_root}
+      MARIADB_DATABASE: censo_educacao_superior
+      MARIADB_USER: ${DB_USER:-censo_user}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-changeme_user}
+    ports:
+      - "127.0.0.1:${DB_PORT:-3306}:3306"
+    volumes:
+      # Schema é aplicado automaticamente no primeiro start (imagens
+      # oficiais do MariaDB executam tudo em /docker-entrypoint-initdb.d/
+      # em ordem alfabética, apenas quando o volume de dados está vazio).
+        - ./sql/01_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+        - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db_data:

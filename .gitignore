@@ -45,3 +45,8 @@
 .bak 
 .mtc
 build/
+# Banco de dados / ETL
+.env
+data/
+__pycache__/
+*.pyc
