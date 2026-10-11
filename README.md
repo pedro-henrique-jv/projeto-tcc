@@ -56,6 +56,16 @@ Para carregar apenas um ano: `python etl/etl.py --data-dir ./data --year 2024`.
 
 O ETL lê a conexão das variáveis `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` e `DB_NAME` (do `.env` ou do ambiente).
 
+## Imagem Docker
+
+O banco também está publicado no DockerHub: https://hub.docker.com/r/jovanowichs/censo-educacao-superior
+
+```bash
+docker run -d --name censo-db -p 127.0.0.1:3306:3306 jovanowichs/censo-educacao-superior
+```
+
+A imagem não define senha de root; por isso a porta é publicada apenas em `127.0.0.1`.
+
 ## Observações sobre o modelo
 
 Cursos a distância aparecem em várias linhas por ano no arquivo do INEP, e a regra correta para somar métricas depende da coluna (`tp_dimensao`). A explicação completa está no cabeçalho de `sql/01_schema.sql` e nos comentários das colunas de `curso_estatisticas`.
