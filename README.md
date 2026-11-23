@@ -1,5 +1,7 @@
 # Banco de dados do Censo da Educação Superior (INEP) para avaliação de LLMs em Text-to-SQL
 
+> Versão usada no TCC: tag `tcc-2026`. Limitações conhecidas: ver [LIMITACOES.md](LIMITACOES.md).
+
 Repositório do Trabalho de Conclusão de Curso *Um Benchmark para Avaliação de Desempenho de LLMs em Tarefas Text-to-SQL sobre Dados do Censo da Educação Superior* (Sistemas de Informação, UFSM).
 
 Aqui estão o **schema SQL** e o **script de ETL** que constroem o banco relacional normalizado (MariaDB) usado como base do benchmark, a partir dos microdados do Censo da Educação Superior de 2009 a 2024, divulgados pelo INEP.
