@@ -23,7 +23,7 @@ Os comentários do banco foram usados para gerar o schema enviado aos modelos; p
 O QueryLab acessa o banco com o usuário `querylab_ro`, que tem apenas permissão de `SELECT`. Esse usuário não é criado por nenhum arquivo deste repositório nem pela imagem Docker; foi criado à mão no contêiner, depois de subir a imagem. Para reproduzir:
 
 ```bash
-docker exec -it censo-db mariadb -uroot -e "
+docker exec -it censo-db mariadb -uroot -p -e "
   CREATE USER 'querylab_ro'@'%' IDENTIFIED BY '<SENHA>';
   GRANT SELECT ON censo_educacao_superior.* TO 'querylab_ro'@'%';"
 ```
